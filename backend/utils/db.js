@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 export const connectionDb=async()=>{
     try {
-        await mongoose.connect("mongodb+srv://sapaky3841_db_user:XlJF9kEcU8ZKBQdy@tripplaner.5ckhxbu.mongodb.net/",{
+        await mongoose.connect(process.env.db_name,{
             dbName:"tripplaner"
         }).then(()=>{
             console.log("connected");
