@@ -1,32 +1,64 @@
-import { Trip } from "../models/tripSchema.js";
+import { v2 as cloudinary } from "cloudinary";
+import {Trip}from "../models/tripSchema.js"; // adjust path
+import { User } from "../models/userSchema.js";
 
-export const addtrip=async(req,res)=>{
-    try {        
-         const {
-  title, destination, description, price, startDate, endDate
-} = req.body;
+export const addTrip = async (req, res) => {
+  try {
+    const {
+      title,
+      destination,
+      price,
+      startDate,
+      endDate,
+      seats,
+      category,
+    } = req.body;
 
-if (!title || !destination || !price || !startDate || !endDate) {
-  return res.status(400).json({ msg: "Required fields missing" });
-}
-
-const newtrip = new Trip({
-  title,
-  destination,
-  description,
-  price,
-  startDate,
-  endDate
-});
-
-const savedtrip = await newtrip.save();
-res.json({ msg: "Trip added successfully!", data: savedtrip });
-
-    } catch (error) {
-            res.status(500).json({ msg: "Server error",error});
-            console.log(error)
+    if (!title || !destination || !price || !startDate || !endDate) {
+      return res.status(400).json({ msg: "Required fields missing" });
     }
-}
+
+    // Upload images to Cloudinary
+    let imageUrls = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "trip_images" },
+            (error, uploadResult) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(uploadResult);
+              }
+            }
+          );
+          stream.end(file.buffer); // ✅ send buffer to cloudinary
+        });
+
+        imageUrls.push(result.secure_url);
+      }
+    }
+
+    // Trip create
+    const newTrip = new Trip({
+      title,
+      destination,
+      price,
+      startDate,
+      endDate,
+      seats,
+      category,
+      images: imageUrls,
+    });
+
+    const savedTrip = await newTrip.save();
+    res.json({ msg: "Trip added successfully!", data: savedTrip });
+  } catch (error) {
+    console.error("Add Trip Error:", error);
+    res.status(500).json({ msg: "Server error", error });
+  }
+};
 
 
 export const updatetrips=async(req,res)=>{
@@ -85,3 +117,26 @@ const trips = (await Trip.find()).sort((a, b) => new Date(a.startDate) - new Dat
        res.status(500).json({ msg: "Server error", error: error.message });
     }   
 }
+
+
+
+export const allusers = async (req, res) => {
+  try {
+
+
+    const users = await User.find({role:"user"}); // sabhi users nikal liye
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ msg: "No users found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data:users,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Server Error", error: error.message });
+  }
+};

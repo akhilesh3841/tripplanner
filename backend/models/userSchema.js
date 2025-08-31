@@ -20,11 +20,6 @@ const userSchema=new mongoose.Schema({
    phone: {
     type: String,
   },
-   profilepic: {
-    type: String,
-    default:
-      "https://cdn-icons-png.flaticon.com/512/149/149071.png", // default avatar
-  },
   role: {
     type: String,
     enum: ["user", "admin"],

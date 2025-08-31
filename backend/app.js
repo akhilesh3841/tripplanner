@@ -4,11 +4,18 @@ import cookieParser from "cookie-parser";
 import cors from "cors"; // Import cors
 import userRoutes from "./routes/userRoutes.js"
 import tripRoutes from "./routes/tripRoutes.js"
+import bookingRoutes from "./routes/bookingRoutes.js"
+import { v2 as cloudinary } from "cloudinary";
+
 
 import dotenv from "dotenv";
 dotenv.config(); 
 
-
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 
@@ -32,6 +39,7 @@ app.get("/", (req, res) => {
 
 app.use("/",userRoutes);
 app.use("/",tripRoutes);
+app.use("/",bookingRoutes)
 
 
 
