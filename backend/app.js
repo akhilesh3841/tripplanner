@@ -3,6 +3,7 @@ import { connectionDb } from "./utils/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors"; // Import cors
 import userRoutes from "./routes/userRoutes.js"
+import tripRoutes from "./routes/tripRoutes.js"
 
 import dotenv from "dotenv";
 dotenv.config(); 
@@ -20,6 +21,8 @@ connectionDb();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true })); // optional, form-data ke liye
+
 
 
 
@@ -28,6 +31,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/",userRoutes);
+app.use("/",tripRoutes);
 
 
 
